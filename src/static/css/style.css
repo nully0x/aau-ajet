@@ -801,11 +801,11 @@ footer {
 }
 
 .pub-grid {
-    display: flex;
-    flex-direction: column;
+    display: grid;
     gap: 15px;
     max-width: 100%;
     overflow-x: visible;
+    grid-template-columns: repeat(2, 1fr);
 }
 
 .pub-card {
