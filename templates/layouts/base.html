@@ -3,36 +3,38 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta name="description" content="The official website for the AJET Journal, featuring the latest articles, submission guidelines, and editorial information." />
-        <meta name="keywords" content="AJET, Journal, Articles, Academic, Research, Submissions, Editorial Board, Contact, AAUA" />
-
-        
+        <meta
+            name="description"
+            content="AJET Journal - A platform for academic articles, research, and manuscript submissions."
+        />
+        <meta
+            name="keywords"
+            content="AJET, Journal, Academic Articles, Research, Manuscripts, Editorial Board"
+        />
+        <meta property="og:title" content="AJET Journal" />
         <title>{% block title %}Journal Site{% endblock %}</title>
         <link rel="stylesheet" href="/static/css/style.css" />
         <script src="/static/js/main.js"></script>
-        <!-- <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
-        <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script> -->
     </head>
     <body>
         <!-- Hero Section with Top Navigation -->
         <header class="hero">
-            <!-- Top Navigation -->
             <nav class="top-nav">
                 <div class="nav-logo">
                     <a href="/" class="nav-logo-link">
-                        <img src="/static/assets/aaua-logo.png" alt="AAUA Logo" class="nav-logo-image">
+                        <img
+                            src="/static/assets/aaua-logo.png"
+                            alt="AAUA Logo - AJET Journal"
+                            class="nav-logo-image"
+                        />
                         <span class="nav-logo-text">AJET Journal</span>
                     </a>
                 </div>
-                
-                <!-- Hamburger Menu Button (visible on mobile) -->
                 <div class="hamburger-menu">
                     <span></span>
                     <span></span>
                     <span></span>
                 </div>
-                
-                <!-- Navigation Items (will be toggled on mobile) -->
                 <div class="nav-items">
                     <a href="/">Home</a>
                     <a href="/journal">Articles</a>
@@ -42,21 +44,21 @@
                     <a href="/about">Contact Us</a>
                 </div>
             </nav>
-        
             {% block hero %}{% endblock %}
         </header>
-
         <section class="section">
             <div class="container">{% block content %}{% endblock %}</div>
         </section>
-
-        <!-- Footer -->
         <footer>
             <div class="footer-content">
                 <div class="footer-left">
                     <div class="footer-logo">
                         <a href="/" class="footer-logo-link">
-                            <img src="/static/assets/aaua-logo.png" alt="AAUA Logo" class="footer-logo-image">
+                            <img
+                                src="/static/assets/aaua-logo.png"
+                                alt="AAUA Logo - AJET Journal"
+                                class="footer-logo-image"
+                            />
                             <span class="footer-logo-text">AJET Journal</span>
                         </a>
                     </div>
@@ -69,20 +71,6 @@
                         <a href="/about">Contact Us</a>
                     </div>
                 </div>
-
-                <!-- <div class="footer-right">
-                    <div class="newsletter">
-                        <h3>Stay up to date with our newsletter</h3>
-                        <div class="newsletter-form">
-                            <input
-                                type="email"
-                                placeholder="Enter your email"
-                            />
-                            <button>Subscribe</button>
-                        </div>
-                    </div>
-                </div> -->
-
                 <div class="divider"></div>
                 <div class="copyright">© 2025 AJET. All rights reserved.</div>
             </div>

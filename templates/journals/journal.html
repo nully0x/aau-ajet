@@ -1,106 +1,110 @@
 {% extends "layouts/base.html" %} {% block content %}
 <div class="journal-explorer">
-  <button class="mobile-menu-toggle" aria-label="Toggle categories menu">
-    ☰
-  </button>
+    <button class="mobile-menu-toggle" aria-label="Toggle categories menu">
+        ☰
+    </button>
 
-  <aside class="journal-sidebar">
-    <h2>Explore Journals/Articles</h2>
-    <h3>Categories</h3>
-    <ul class="category-list">
-      <li class="active" data-category="all">All</li>
-      <li data-category="latest">Latest Articles</li>
-      <li data-category="current">Current Edition</li>
-      <li data-category="past">Past Issue</li>
-    </ul>
-  </aside>
+    <aside class="journal-sidebar">
+        <h2>Explore Journals/Articles</h2>
+        <h3>Categories</h3>
+        <ul class="category-list">
+            <li class="active" data-category="all">All</li>
+            <li data-category="latest">Latest Articles</li>
+            <li data-category="current">Current Edition</li>
+            <li data-category="past">Past Issue</li>
+        </ul>
+    </aside>
 
-  <main class="journal-content">
-    <div class="journal-filters">
-      <span id="filterTitle" class="filter-title"
-        >Showing for all articles/journals</span
-      >
-      <div class="filter-controls">
-        <div class="filter-input">
-          <i class="fas fa-filter" aria-hidden="true"></i>
-          <input
-            type="text"
-            placeholder="Vol No."
-            aria-label="Volume number filter"
-          />
+    <main class="journal-content">
+        <div class="journal-filters">
+            <span id="filterTitle" class="filter-title"
+                >Showing for all articles/journals</span
+            >
+            <div class="filter-controls">
+                <div class="filter-input">
+                    <i class="fas fa-filter" aria-hidden="true"></i>
+                    <input
+                        type="text"
+                        placeholder="Vol No."
+                        aria-label="Volume number filter"
+                    />
+                </div>
+                <div class="filter-input">
+                    <i class="fas fa-filter" aria-hidden="true"></i>
+                    <input
+                        type="text"
+                        placeholder="Issue No."
+                        aria-label="Issue number filter"
+                    />
+                </div>
+                <button class="apply-filter">Apply Filter</button>
+            </div>
         </div>
-        <div class="filter-input">
-          <i class="fas fa-filter" aria-hidden="true"></i>
-          <input
-            type="text"
-            placeholder="Issue No."
-            aria-label="Issue number filter"
-          />
+
+        <div class="journal-grid" id="journalContainer">
+            {% for journal in journals %}
+            <article
+                class="journal-card"
+                onclick="window.location.href='/journals/{{journal.id_string()}}'"
+            >
+                <p class="journal-meta">
+                    Volume: {{journal.volume}} | Page: {{journal.pages}}
+                </p>
+                <h3 class="journal-title">{{journal.title}}</h3>
+                <div class="journal-abstract">
+                    <strong>Abstract:</strong>
+                    <p>{{journal.abstract_text}}</p>
+                </div>
+                <div class="journal-authors">
+                    <img src="/static/assets/group.png" alt="Authors icon" />
+                    <span>{{journal.authors}}</span>
+                </div>
+            </article>
+            {% endfor %}
         </div>
-        <button class="apply-filter">Apply Filter</button>
-      </div>
-    </div>
+        <script>
+            document
+                .querySelector(".mobile-menu-toggle")
+                .addEventListener("click", function () {
+                    document
+                        .querySelector(".journal-sidebar")
+                        .classList.toggle("active");
+                });
 
-    <div class="journal-grid" id="journalContainer">
-      {% for journal in journals %}
-      <article
-        class="journal-card"
-        onclick="window.location.href='/journals/{{journal.id_string()}}'"
-      >
-        <p class="journal-meta">
-          Volume: {{journal.volume}} | Page: {{journal.pages}}
-        </p>
-        <h3 class="journal-title">{{journal.title}}</h3>
-        <div class="journal-abstract">
-          <strong>Abstract:</strong> {{journal.abstract_text}}
-        </div>
-        <div class="journal-authors">
-          <img src="/static/assets/group.png" alt="Authors icon" />
-          <span>{{journal.authors}}</span>
-        </div>
-      </article>
-      {% endfor %}
-    </div>
-    <script>
-      document
-        .querySelector(".mobile-menu-toggle")
-        .addEventListener("click", function () {
-          document.querySelector(".journal-sidebar").classList.toggle("active");
-        });
+            document.querySelectorAll(".category-list li").forEach((item) => {
+                item.addEventListener("click", async function () {
+                    document
+                        .querySelectorAll(".category-list li")
+                        .forEach((li) => {
+                            li.classList.remove("active");
+                        });
 
-      document.querySelectorAll(".category-list li").forEach((item) => {
-        item.addEventListener("click", async function () {
-          document.querySelectorAll(".category-list li").forEach((li) => {
-            li.classList.remove("active");
-          });
+                    this.classList.add("active");
 
-          this.classList.add("active");
+                    document.getElementById("filterTitle").textContent =
+                        `Showing for ${this.textContent.toLowerCase()} articles`;
 
-          document.getElementById(
-            "filterTitle"
-          ).textContent = `Showing for ${this.textContent.toLowerCase()} articles`;
+                    await fetchJournals(this.dataset.category);
+                });
+            });
 
-          await fetchJournals(this.dataset.category);
-        });
-      });
+            document
+                .getElementById("loadMoreBtn")
+                ?.addEventListener("click", async function () {
+                    await fetchMoreJournals();
+                });
 
-      document
-        .getElementById("loadMoreBtn")
-        ?.addEventListener("click", async function () {
-          await fetchMoreJournals();
-        });
+            async function fetchJournals(category) {
+                console.log(`Fetching journals for category: ${category}`);
+            }
 
-      async function fetchJournals(category) {
-        console.log(`Fetching journals for category: ${category}`);
-      }
+            async function fetchMoreJournals() {
+                console.log("Fetching more journals");
+            }
+        </script>
 
-      async function fetchMoreJournals() {
-        console.log("Fetching more journals");
-      }
-    </script>
-
-    <button id="loadMoreBtn" class="load-more-btn">Load More</button>
-  </main>
+        <button id="loadMoreBtn" class="load-more-btn">Load More</button>
+    </main>
 </div>
 
 {% endblock %}
