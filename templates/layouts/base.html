@@ -3,40 +3,30 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta name="description" content="AJET Journal - A platform for academic articles, research, and manuscript submissions." />
-        <meta name="keywords" content="AJET, Journal, Academic Articles, Research, Manuscripts, Editorial Board" />
-        <meta name="author" content="AJET Editorial Team" />
+        <meta
+            name="description"
+            content="AJET Journal - A platform for academic articles, research, and manuscript submissions."
+        />
+        <meta
+            name="keywords"
+            content="AJET, Journal, Academic Articles, Research, Manuscripts, Editorial Board"
+        />
         <meta property="og:title" content="AJET Journal" />
-        <meta property="og:description" content="A platform for academic articles, research, and manuscript submissions." />
-        <meta property="og:image" content="https://aau-ajet.org/static/assets/aaua-logo.png" />
-        <meta property="og:url" content="https://aau-ajet.org" />
-        <meta property="og:type" content="website" />
-        <link rel="canonical" href="https://aau-ajet.org" />
         <title>{% block title %}Journal Site{% endblock %}</title>
-        <link rel="stylesheet" href="https://aau-ajet.org/static/css/style.css" />
-        <script src="https://aau-ajet.org/static/js/main.js"></script>
-        <script type="application/ld+json">
-        {
-            "@context": "https://schema.org",
-            "@type": "Organization",
-            "name": "AJET Journal",
-            "url": "https://aau-ajet.org",
-            "logo": "https://aau-ajet.org/static/assets/aaua-logo.png",
-            "sameAs": [
-                "https://www.facebook.com/yourpage",
-                "https://twitter.com/yourpage",
-                "https://www.linkedin.com/in/yourpage"
-            ]
-        }
-        </script>
+        <link rel="stylesheet" href="/static/css/style.css" />
+        <script src="/static/js/main.js"></script>
     </head>
     <body>
         <!-- Hero Section with Top Navigation -->
         <header class="hero">
             <nav class="top-nav">
                 <div class="nav-logo">
-                    <a href="https://aau-ajet.org/" class="nav-logo-link">
-                        <img src="https://aau-ajet.org/static/assets/aaua-logo.png" alt="AAUA Logo - AJET Journal" class="nav-logo-image">
+                    <a href="/" class="nav-logo-link">
+                        <img
+                            src="/static/assets/aaua-logo.png"
+                            alt="AAUA Logo - AJET Journal"
+                            class="nav-logo-image"
+                        />
                         <span class="nav-logo-text">AJET Journal</span>
                     </a>
                 </div>
@@ -46,12 +36,12 @@
                     <span></span>
                 </div>
                 <div class="nav-items">
-                    <a href="https://aau-ajet.org/">Home</a>
-                    <a href="https://aau-ajet.org/journal">Articles</a>
-                    <a href="https://aau-ajet.org/submit">Submit an Article</a>
-                    <a href="https://aau-ajet.org/manuscript">Manuscript Guide</a>
-                    <a href="https://aau-ajet.org/editorial-board">Editorial Board</a>
-                    <a href="https://aau-ajet.org/about">Contact Us</a>
+                    <a href="/">Home</a>
+                    <a href="/journal">Articles</a>
+                    <a href="/submit">Submit an Article</a>
+                    <a href="/manuscript">Manuscript Guide</a>
+                    <a href="/editorial-board">Editorial Board</a>
+                    <a href="/about">Contact Us</a>
                 </div>
             </nav>
             {% block hero %}{% endblock %}
@@ -63,18 +53,22 @@
             <div class="footer-content">
                 <div class="footer-left">
                     <div class="footer-logo">
-                        <a href="https://aau-ajet.org/" class="footer-logo-link">
-                            <img src="https://aau-ajet.org/static/assets/aaua-logo.png" alt="AAUA Logo - AJET Journal" class="footer-logo-image">
+                        <a href="/" class="footer-logo-link">
+                            <img
+                                src="/static/assets/aaua-logo.png"
+                                alt="AAUA Logo - AJET Journal"
+                                class="footer-logo-image"
+                            />
                             <span class="footer-logo-text">AJET Journal</span>
                         </a>
                     </div>
                     <div class="footer-links">
-                        <a href="https://aau-ajet.org/">Home</a>
-                        <a href="https://aau-ajet.org/journals/current">Articles</a>
-                        <a href="https://aau-ajet.org/submit">Submit an Article</a>
-                        <a href="https://aau-ajet.org/manuscript">Manuscript Guide</a>
-                        <a href="https://aau-ajet.org/editorial-board">Editorial Board</a>
-                        <a href="https://aau-ajet.org/about">Contact Us</a>
+                        <a href="/">Home</a>
+                        <a href="/journals/current">Articles</a>
+                        <a href="/submit">Submit an Article</a>
+                        <a href="/manuscript">Manuscript Guide</a>
+                        <a href="/editorial-board">Editorial Board</a>
+                        <a href="/about">Contact Us</a>
                     </div>
                 </div>
                 <div class="divider"></div>

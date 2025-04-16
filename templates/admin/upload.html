@@ -1,228 +1,364 @@
 {% extends "admin/layouts/base.html" %} {% block title %}Upload Article{%
-    endblock %} {% block content %}
-    <div
-        class="container"
-        style="
-            padding: 20px;
-            max-width: 800px;
-            margin: 20px auto;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        "
+endblock %} {% block content %}
+<div
+    class="container"
+    style="
+        padding: 20px;
+        max-width: 800px;
+        margin: 20px auto;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    "
+>
+    <h1>Upload Journal</h1>
+    <p>Use this form to upload a new journal article to the database.</p>
+
+    <form
+        action="/admin/upload"
+        method="post"
+        enctype="multipart/form-data"
+        style="margin-top: 20px"
+        id="uploadForm"
     >
-        <h1>Upload Journal</h1>
-        <p>Use this form to upload a new journal article to the database.</p>
-    
-        <form
-            action="/admin/upload"
-            method="post"
-            enctype="multipart/form-data"
-            style="margin-top: 20px"
-            id="uploadForm"
-        >
-            {# Add CSRF token here if using CSRF protection #}
-    
-            <div class="form-group" style="margin-bottom: 15px;">
-                <label for="title" style="display: block; margin-bottom: 5px; font-weight: 500; color: #333;">Title</label>
-                <input
-                    type="text"
-                    id="title"
-                    name="title"
-                    required
-                    class="form-control"
-                    style="width: 100%; padding: 8px 12px; border: 1px solid #ced4da; border-radius: 4px; font-size: 16px; transition: border-color 0.15s ease-in-out; box-sizing: border-box;"
-                    onFocus="this.style.borderColor='#4a5568'; this.style.boxShadow='0 0 0 0.2rem rgba(0,123,255,.25)';"
-                    onBlur="this.style.borderColor='#ced4da'; this.style.boxShadow='none';"
-                />
-            </div>
-    
-            <div class="form-group" style="margin-bottom: 15px;">
-                <label for="authors" style="display: block; margin-bottom: 5px; font-weight: 500; color: #333;">Authors (comma separated)</label>
-                <input
-                    type="text"
-                    id="authors"
-                    name="authors"
-                    required
-                    class="form-control"
-                    style="width: 100%; padding: 8px 12px; border: 1px solid #ced4da; border-radius: 4px; font-size: 16px; transition: border-color 0.15s ease-in-out; box-sizing: border-box;"
-                    onFocus="this.style.borderColor='#4a5568'; this.style.boxShadow='0 0 0 0.2rem rgba(0,123,255,.25)';"
-                    onBlur="this.style.borderColor='#ced4da'; this.style.boxShadow='none';"
-                />
-            </div>
-    
-            {# Use form-row or similar for layout #}
-            <div style="display: flex; gap: 1rem; margin-bottom: 15px;">
-                <div class="form-group" style="flex: 1;">
-                    <label for="volume" style="display: block; margin-bottom: 5px; font-weight: 500; color: #333;">Volume</label>
-                    <input
-                        type="text"
-                        id="volume"
-                        name="volume"
-                        required
-                        class="form-control"
-                        style="width: 100%; padding: 8px 12px; border: 1px solid #ced4da; border-radius: 4px; font-size: 16px; transition: border-color 0.15s ease-in-out; box-sizing: border-box;"
-                        onFocus="this.style.borderColor='#4a5568'; this.style.boxShadow='0 0 0 0.2rem rgba(0,123,255,.25)';"
-                        onBlur="this.style.borderColor='#ced4da'; this.style.boxShadow='none';"
-                    />
-                </div>
-                <div class="form-group" style="flex: 1;">
-                    <label for="pages" style="display: block; margin-bottom: 5px; font-weight: 500; color: #333;">Pages</label>
-                    <input
-                        type="text"
-                        id="pages"
-                        name="pages"
-                        required
-                        class="form-control"
-                        style="width: 100%; padding: 8px 12px; border: 1px solid #ced4da; border-radius: 4px; font-size: 16px; transition: border-color 0.15s ease-in-out; box-sizing: border-box;"
-                        onFocus="this.style.borderColor='#4a5568'; this.style.boxShadow='0 0 0 0.2rem rgba(0,123,255,.25)';"
-                        onBlur="this.style.borderColor='#ced4da'; this.style.boxShadow='none';"
-                    />
-                </div>
-                <div class="form-group" style="flex: 1;">
-                    <label for="publication_date" style="display: block; margin-bottom: 5px; font-weight: 500; color: #333;">Publication Date</label>
-                    <input
-                        type="date"
-                        id="publication_date"
-                        name="publication_date"
-                        required
-                        class="form-control"
-                        style="width: 100%; padding: 8px 12px; border: 1px solid #ced4da; border-radius: 4px; font-size: 16px; transition: border-color 0.15s ease-in-out; box-sizing: border-box;"
-                        onFocus="this.style.borderColor='#4a5568'; this.style.boxShadow='0 0 0 0.2rem rgba(0,123,255,.25)';"
-                        onBlur="this.style.borderColor='#ced4da'; this.style.boxShadow='none';"
-                    />
-                </div>
-            </div>
-    
-            <div class="form-group" style="margin-bottom: 15px;">
-                <label for="abstract_text" style="display: block; margin-bottom: 5px; font-weight: 500; color: #333;">Abstract</label>
-                <textarea
-                    id="abstract_text"
-                    name="abstract_text"
-                    rows="5"
-                    required
-                    class="form-control"
-                    style="width: 100%; padding: 8px 12px; border: 1px solid #ced4da; border-radius: 4px; font-size: 16px; transition: border-color 0.15s ease-in-out; box-sizing: border-box; resize: vertical;"
-                    onFocus="this.style.borderColor='#4a5568'; this.style.boxShadow='0 0 0 0.2rem rgba(0,123,255,.25)';"
-                    onBlur="this.style.borderColor='#ced4da'; this.style.boxShadow='none';"
-                ></textarea>
-            </div>
-    
-            <div class="form-group" style="margin-bottom: 15px;">
-                <label for="keywords" style="display: block; margin-bottom: 5px; font-weight: 500; color: #333;">Keywords (comma separated)</label>
-                <input
-                    type="text"
-                    id="keywords"
-                    name="keywords"
-                    required
-                    class="form-control"
-                    style="width: 100%; padding: 8px 12px; border: 1px solid #ced4da; border-radius: 4px; font-size: 16px; transition: border-color 0.15s ease-in-out; box-sizing: border-box;"
-                    onFocus="this.style.borderColor='#4a5568'; this.style.boxShadow='0 0 0 0.2rem rgba(0,123,255,.25)';"
-                    onBlur="this.style.borderColor='#ced4da'; this.style.boxShadow='none';"
-                />
-            </div>
-    
-            <div class="form-group" style="margin-bottom: 15px;">
-                <label for="pdf" style="display: block; margin-bottom: 5px; font-weight: 500; color: #333;">PDF File</label>
-                <div class="upload-file" style="border: 1px solid #ced4da; border-radius: 4px; padding: 10px; background-color: #f8f9fa;">
-                    <input 
-                        type="file" 
-                        id="pdf" 
-                        name="pdf" 
-                        accept=".pdf" 
-                        required 
-                        style="display: block; width: 100%;"
-                    />
-                </div>
-                <p
-                    class="file-note"
-                    style="font-size: 0.85rem; color: #666; margin-top: 0.5rem"
-                >
-                    Only PDF files are accepted.
-                </p>
-            </div>
-    
-            <button
-                class="submit-btn upload-btn"
-                type="submit"
+        {# Add CSRF token here if using CSRF protection #}
+
+        <div class="form-group" style="margin-bottom: 15px">
+            <label
+                for="title"
                 style="
-                    margin-top: 1rem;
-                    padding: 10px 20px;
-                    background-color: #1d2057;
-                    color: white;
-                    border: none;
+                    display: block;
+                    margin-bottom: 5px;
+                    font-weight: 500;
+                    color: #333;
+                "
+                >Title</label
+            >
+            <input
+                type="text"
+                id="title"
+                name="title"
+                required
+                class="form-control"
+                style="
+                    width: 100%;
+                    padding: 8px 12px;
+                    border: 1px solid #ced4da;
                     border-radius: 4px;
                     font-size: 16px;
-                    font-weight: 500;
-                    cursor: pointer;
-                    transition: background-color 0.2s;
+                    transition: border-color 0.15s ease-in-out;
+                    box-sizing: border-box;
                 "
-                onMouseOver="this.style.backgroundColor='#2a2e82';"
-                onMouseOut="this.style.backgroundColor='#1d2057';"
-            >
-                Upload Journal
-            </button>
-        </form>
-    
-        <div id="uploadStatus" style="margin-top: 20px; display: none">
-            <p class="success" style="color: green"></p>
-            <p class="error" style="color: red"></p>
+                onFocus="this.style.borderColor='#4a5568'; this.style.boxShadow='0 0 0 0.2rem rgba(0,123,255,.25)';"
+                onBlur="this.style.borderColor='#ced4da'; this.style.boxShadow='none';"
+            />
         </div>
+
+        <div class="form-group" style="margin-bottom: 15px">
+            <label
+                for="authors"
+                style="
+                    display: block;
+                    margin-bottom: 5px;
+                    font-weight: 500;
+                    color: #333;
+                "
+                >Authors (comma separated)</label
+            >
+            <input
+                type="text"
+                id="authors"
+                name="authors"
+                required
+                class="form-control"
+                style="
+                    width: 100%;
+                    padding: 8px 12px;
+                    border: 1px solid #ced4da;
+                    border-radius: 4px;
+                    font-size: 16px;
+                    transition: border-color 0.15s ease-in-out;
+                    box-sizing: border-box;
+                "
+                onFocus="this.style.borderColor='#4a5568'; this.style.boxShadow='0 0 0 0.2rem rgba(0,123,255,.25)';"
+                onBlur="this.style.borderColor='#ced4da'; this.style.boxShadow='none';"
+            />
+        </div>
+
+        {# Use form-row or similar for layout #}
+        <div style="display: flex; gap: 1rem; margin-bottom: 15px">
+            <div class="form-group" style="flex: 1">
+                <label
+                    for="volume"
+                    style="
+                        display: block;
+                        margin-bottom: 5px;
+                        font-weight: 500;
+                        color: #333;
+                    "
+                    >Volume</label
+                >
+                <input
+                    type="text"
+                    id="volume"
+                    name="volume"
+                    required
+                    class="form-control"
+                    style="
+                        width: 100%;
+                        padding: 8px 12px;
+                        border: 1px solid #ced4da;
+                        border-radius: 4px;
+                        font-size: 16px;
+                        transition: border-color 0.15s ease-in-out;
+                        box-sizing: border-box;
+                    "
+                    onFocus="this.style.borderColor='#4a5568'; this.style.boxShadow='0 0 0 0.2rem rgba(0,123,255,.25)';"
+                    onBlur="this.style.borderColor='#ced4da'; this.style.boxShadow='none';"
+                />
+            </div>
+            <div class="form-group" style="flex: 1">
+                <label
+                    for="pages"
+                    style="
+                        display: block;
+                        margin-bottom: 5px;
+                        font-weight: 500;
+                        color: #333;
+                    "
+                    >Pages</label
+                >
+                <input
+                    type="text"
+                    id="pages"
+                    name="pages"
+                    required
+                    class="form-control"
+                    style="
+                        width: 100%;
+                        padding: 8px 12px;
+                        border: 1px solid #ced4da;
+                        border-radius: 4px;
+                        font-size: 16px;
+                        transition: border-color 0.15s ease-in-out;
+                        box-sizing: border-box;
+                    "
+                    onFocus="this.style.borderColor='#4a5568'; this.style.boxShadow='0 0 0 0.2rem rgba(0,123,255,.25)';"
+                    onBlur="this.style.borderColor='#ced4da'; this.style.boxShadow='none';"
+                />
+            </div>
+            <div class="form-group" style="flex: 1">
+                <label
+                    for="publication_date"
+                    style="
+                        display: block;
+                        margin-bottom: 5px;
+                        font-weight: 500;
+                        color: #333;
+                    "
+                    >Publication Date</label
+                >
+                <input
+                    type="date"
+                    id="publication_date"
+                    name="publication_date"
+                    required
+                    class="form-control"
+                    style="
+                        width: 100%;
+                        padding: 8px 12px;
+                        border: 1px solid #ced4da;
+                        border-radius: 4px;
+                        font-size: 16px;
+                        transition: border-color 0.15s ease-in-out;
+                        box-sizing: border-box;
+                    "
+                    onFocus="this.style.borderColor='#4a5568'; this.style.boxShadow='0 0 0 0.2rem rgba(0,123,255,.25)';"
+                    onBlur="this.style.borderColor='#ced4da'; this.style.boxShadow='none';"
+                />
+            </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 15px">
+            <label
+                for="abstract_text"
+                style="
+                    display: block;
+                    margin-bottom: 5px;
+                    font-weight: 500;
+                    color: #333;
+                "
+                >Abstract</label
+            >
+            <textarea
+                id="abstract_text"
+                name="abstract_text"
+                rows="5"
+                required
+                class="form-control"
+                style="
+                    width: 100%;
+                    padding: 8px 12px;
+                    border: 1px solid #ced4da;
+                    border-radius: 4px;
+                    font-size: 16px;
+                    transition: border-color 0.15s ease-in-out;
+                    box-sizing: border-box;
+                    resize: vertical;
+                "
+                onFocus="this.style.borderColor='#4a5568'; this.style.boxShadow='0 0 0 0.2rem rgba(0,123,255,.25)';"
+                onBlur="this.style.borderColor='#ced4da'; this.style.boxShadow='none';"
+            ></textarea>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 15px">
+            <label
+                for="keywords"
+                style="
+                    display: block;
+                    margin-bottom: 5px;
+                    font-weight: 500;
+                    color: #333;
+                "
+                >Keywords (comma separated)</label
+            >
+            <input
+                type="text"
+                id="keywords"
+                name="keywords"
+                class="form-control"
+                style="
+                    width: 100%;
+                    padding: 8px 12px;
+                    border: 1px solid #ced4da;
+                    border-radius: 4px;
+                    font-size: 16px;
+                    transition: border-color 0.15s ease-in-out;
+                    box-sizing: border-box;
+                "
+                onFocus="this.style.borderColor='#4a5568'; this.style.boxShadow='0 0 0 0.2rem rgba(0,123,255,.25)';"
+                onBlur="this.style.borderColor='#ced4da'; this.style.boxShadow='none';"
+            />
+        </div>
+
+        <div class="form-group" style="margin-bottom: 15px">
+            <label
+                for="pdf"
+                style="
+                    display: block;
+                    margin-bottom: 5px;
+                    font-weight: 500;
+                    color: #333;
+                "
+                >PDF File</label
+            >
+            <div
+                class="upload-file"
+                style="
+                    border: 1px solid #ced4da;
+                    border-radius: 4px;
+                    padding: 10px;
+                    background-color: #f8f9fa;
+                "
+            >
+                <input
+                    type="file"
+                    id="pdf"
+                    name="pdf"
+                    accept=".pdf"
+                    required
+                    style="display: block; width: 100%"
+                />
+            </div>
+            <p
+                class="file-note"
+                style="font-size: 0.85rem; color: #666; margin-top: 0.5rem"
+            >
+                Only PDF files are accepted.
+            </p>
+        </div>
+
+        <button
+            class="submit-btn upload-btn"
+            type="submit"
+            style="
+                margin-top: 1rem;
+                padding: 10px 20px;
+                background-color: #1d2057;
+                color: white;
+                border: none;
+                border-radius: 4px;
+                font-size: 16px;
+                font-weight: 500;
+                cursor: pointer;
+                transition: background-color 0.2s;
+            "
+            onMouseOver="this.style.backgroundColor='#2a2e82';"
+            onMouseOut="this.style.backgroundColor='#1d2057';"
+        >
+            Upload Journal
+        </button>
+    </form>
+
+    <div id="uploadStatus" style="margin-top: 20px; display: none">
+        <p class="success" style="color: green"></p>
+        <p class="error" style="color: red"></p>
     </div>
-    {% endblock %} {% block scripts %}
-    <script>
-        document
-            .getElementById("uploadForm")
-            ?.addEventListener("submit", async (e) => {
-                e.preventDefault();
-    
-                const formData = new FormData(e.target);
-                const statusDiv = document.getElementById("uploadStatus");
-                const successMsg = statusDiv.querySelector(".success");
-                const errorMsg = statusDiv.querySelector(".error");
-                const submitButton = e.target.querySelector(
-                    'button[type="submit"]',
-                );
-    
-                submitButton.disabled = true; // Disable button during upload
-                submitButton.textContent = "Uploading...";
-                statusDiv.style.display = "none"; // Hide previous status
-                successMsg.textContent = "";
-                errorMsg.textContent = "";
-    
-                try {
-                    const response = await fetch("/admin/upload", {
-                        // Ensure URL matches POST route
-                        method: "POST",
-                        body: formData,
-                        // Add headers if needed (e.g., CSRF token)
-                    });
-    
-                    const result = await response.json();
-    
-                    statusDiv.style.display = "block";
-                    if (response.ok && result.success) {
-                        successMsg.textContent =
-                            result.message || "Upload successful!";
-                        errorMsg.textContent = "";
-                        e.target.reset(); // Clear form on success
-                        setTimeout(() => {
-                            statusDiv.style.display = "none";
-                        }, 5000); // Hide status after 5s
-                    } else {
-                        successMsg.textContent = "";
-                        errorMsg.textContent = `Error: ${result.message || response.statusText || "Upload failed"}`;
-                    }
-                } catch (error) {
-                    console.error("Upload error:", error);
-                    statusDiv.style.display = "block";
+</div>
+{% endblock %} {% block scripts %}
+<script>
+    document
+        .getElementById("uploadForm")
+        ?.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const formData = new FormData(e.target);
+            const statusDiv = document.getElementById("uploadStatus");
+            const successMsg = statusDiv.querySelector(".success");
+            const errorMsg = statusDiv.querySelector(".error");
+            const submitButton = e.target.querySelector(
+                'button[type="submit"]',
+            );
+
+            submitButton.disabled = true; // Disable button during upload
+            submitButton.textContent = "Uploading...";
+            statusDiv.style.display = "none"; // Hide previous status
+            successMsg.textContent = "";
+            errorMsg.textContent = "";
+
+            try {
+                const response = await fetch("/admin/upload", {
+                    // Ensure URL matches POST route
+                    method: "POST",
+                    body: formData,
+                    // Add headers if needed (e.g., CSRF token)
+                });
+
+                const result = await response.json();
+
+                statusDiv.style.display = "block";
+                if (response.ok && result.success) {
+                    successMsg.textContent =
+                        result.message || "Upload successful!";
+                    errorMsg.textContent = "";
+                    e.target.reset(); // Clear form on success
+                    setTimeout(() => {
+                        statusDiv.style.display = "none";
+                    }, 5000); // Hide status after 5s
+                } else {
                     successMsg.textContent = "";
-                    errorMsg.textContent =
-                        "An unexpected error occurred during upload.";
-                } finally {
-                    submitButton.disabled = false; 
-                    submitButton.textContent = "Upload Journal";
+                    errorMsg.textContent = `Error: ${result.message || response.statusText || "Upload failed"}`;
                 }
-            });
-    </script>
-    {% endblock %}
+            } catch (error) {
+                console.error("Upload error:", error);
+                statusDiv.style.display = "block";
+                successMsg.textContent = "";
+                errorMsg.textContent =
+                    "An unexpected error occurred during upload.";
+            } finally {
+                submitButton.disabled = false;
+                submitButton.textContent = "Upload Journal";
+            }
+        });
+</script>
+{% endblock %}

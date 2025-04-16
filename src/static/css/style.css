@@ -773,9 +773,7 @@ footer {
     color: #000000;
 }
 
-
-
-/* ===== PUBLICATIONS SECTION ===== */
+/* Publications Section */
 .publications {
     padding: 20px;
     background-color: #f9f9f9;
@@ -786,8 +784,7 @@ footer {
     flex-direction: column;
     align-items: flex-start;
     margin-bottom: 15px;
-    max-width: 1200px;
-    margin: 0 auto 20px;
+    max-width: 100%;
 }
 
 .pub-header h2 {
@@ -804,24 +801,19 @@ footer {
 }
 
 .pub-grid {
-    display: grid;
-    gap: 20px;
-    max-width: 1200px;
-    margin: 0 auto;
-    grid-template-columns: 1fr;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    max-width: 100%;
+    overflow-x: visible;
 }
 
 .pub-card {
+    width: 100%;
     background: white;
     border: 1px solid #eee;
-    border-radius: 8px;
-    padding: 20px;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.pub-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    padding: 15px;
+    box-sizing: border-box;
 }
 
 .pub-vol {
@@ -831,7 +823,7 @@ footer {
 }
 
 .pub-title {
-    font-size: 16px;
+    font-size: 14px;
     margin-bottom: 10px;
     font-weight: bold;
     color: #1e73be;
@@ -842,12 +834,20 @@ footer {
     font-size: 14px;
     line-height: 1.6;
     color: #555;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
 .pub-abstract strong {
+    font-size: 14px;
     display: block;
     margin-bottom: 5px;
-    color: #333;
+}
+
+.pub-abstract p {
+    font-size: 14px;
 }
 
 .pub-meta {
@@ -864,134 +864,112 @@ footer {
     margin-right: 5px;
 }
 
-/* ===== JOURNAL EXPLORER ===== */
-.journal-explorer {
-    max-width: 1200px;
-    margin: 2rem auto;
-    display: flex;
-    flex-direction: column;
-}
-
-.journal-content {
-    width: 100%;
-}
-
-.journal-grid {
-    display: grid;
-    gap: 20px;
-    grid-template-columns: 1fr;
-}
-
-.journal-card {
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.journal-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-}
-
-.journal-meta {
-    font-size: 14px;
-    color: #718096;
-    margin-bottom: 10px;
-}
-
-.journal-title {
-    color: #2a166f;
-    font-size: 16px;
-    margin: 10px 0;
-    line-height: 1.4;
-    font-weight: 600;
-}
-
-.journal-abstract {
-    font-size: 14px;
-    color: #4a5568;
-    line-height: 1.6;
-    margin-bottom: 15px;
-}
-
-.journal-abstract strong {
-    color: #2a166f;
-}
-
-.journal-authors {
-    display: flex;
-    align-items: center;
-    font-size: 14px;
-    color: #718096;
-}
-
-.journal-authors img {
-    width: 20px;
-    height: 20px;
-    margin-right: 8px;
-}
-
-/* ===== RESPONSIVE BREAKPOINTS ===== */
+/* Tablet and larger screens */
 @media (min-width: 768px) {
-    .pub-grid,
-    .journal-grid {
-        grid-template-columns: repeat(2, 1fr);
+    .main-content {
+        flex-direction: row;
+        margin-top: 100px;
+        padding: 30px;
+        max-width: 1200px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .text-content {
+        padding-right: 40px;
+        order: 1;
+    }
+
+    .image-content {
+        order: 2;
+        margin-top: 0;
+    }
+
+    .text-content h3 {
+        text-align: left;
+        font-size: 48px;
+    }
+
+    .btn {
+        width: auto;
+        display: inline-block;
+    }
+
+    .stats {
+        flex-direction: row;
+        justify-content: space-around;
+        gap: 20px;
+    }
+
+    .stat-item {
+        flex: 1;
+        max-width: 200px;
+        padding: 20px 40px;
+    }
+
+    .stat-number {
+        font-size: 36px;
     }
 
     .pub-header {
         flex-direction: row;
         justify-content: space-between;
         align-items: center;
+        max-width: 1200px;
+        margin: 0 auto 20px;
     }
-}
 
-@media (min-width: 1024px) {
-    .journal-explorer {
+    .pub-grid {
         flex-direction: row;
-        gap: 2rem;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+        max-width: 1200px;
+        margin: 0 auto;
     }
-    
-    .journal-sidebar {
-        width: 280px;
-        position: sticky;
-        top: 20px;
+
+    .pub-card {
+        flex: 0 0 calc(50% - 10px);
     }
-    
-    .journal-content {
-        flex: 1;
+
+    .blue-box {
+        display: block;
+        position: absolute;
+        right: -30px;
+        top: 0;
+        width: 60px;
+        height: 99%;
+        background: #cbe2ff;
     }
 }
 
-/* Pagination - keep existing styles */
-.pagination {
-    display: flex;
-    justify-content: center;
-    margin-top: 30px;
+@media (min-width: 768px) {
+    .pub-grid {
+        grid-template-columns: repeat(2, 1fr); /* Changed from 3 to 2 */
+        gap: 1.5rem;
+    }
 }
 
-.page-item {
-    width: 30px;
-    height: 30px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 5px;
-    border-radius: 50%;
-    background-color: white;
-    border: 1px solid #ddd;
-    cursor: pointer;
+@media (min-width: 1440px) {
+    .pub-grid {
+        grid-template-columns: repeat(2, 1fr); /* Changed from 3 to 2 */
+    }
 }
 
-.page-item.active {
-    background-color: #1e73be;
-    color: white;
-    border-color: #1e73be;
+/* Desktop and larger screens */
+@media (min-width: 992px) {
+    .pub-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .pub-card {
+        flex: 0 0 calc(33.333% - 20px);
+    }
+
+    .blue-box {
+        right: -60px;
+        width: 80px;
+    }
 }
-
-
-
 /* Pagination */
 .pagination {
     display: flex;
@@ -1018,9 +996,6 @@ footer {
     border-color: #1e73be;
 }
 
-
-
-/* ===== BASE STYLES ===== */
 .journal-explorer {
     display: flex;
     flex-direction: column;
@@ -1049,11 +1024,11 @@ footer {
     border-radius: 0.5rem;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     position: relative;
-    display: none;
+    display: none; /* Hidden by default on mobile */
 }
 
 .journal-sidebar.active {
-    display: block;
+    display: block; /* Show when menu is toggled */
 }
 
 .journal-sidebar h2 {
@@ -1156,7 +1131,208 @@ footer {
     background: #1a1047;
 }
 
+.journal-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    /* grid-template-columns: 1fr; */
+    gap: 1rem;
+}
 
+.journal-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition:
+        transform 0.2s,
+        box-shadow 0.2s;
+    cursor: pointer;
+    overflow: hidden; /* ADDED: This prevents anything inside from visually spilling out */
+    display: flex; /* ADDED: Use flexbox for better control over vertical spacing */
+    flex-direction: column;
+}
+
+.journal-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+}
+
+.journal-meta {
+    font-size: 0.8rem;
+    color: #718096;
+    margin-bottom: 0.5rem;
+    flex-shrink: 0; /* ADDED: Prevent meta info from shrinking */
+}
+
+.journal-title {
+    color: #2a166f;
+    font-size: 1.1rem;
+    margin: 0.75rem 0;
+    line-height: 1.4;
+    overflow-wrap: break-word; /* ADDED: Allows long words/titles to break */
+    word-break: break-word; /* ADDED: Alternative/fallback word breaking */
+    flex-shrink: 0; /* ADDED: Prevent title from shrinking */
+}
+
+.journal-abstract {
+    font-size: 0.9rem;
+    color: #4a5568;
+    line-height: 1.5;
+    margin-bottom: 1rem;
+    overflow-wrap: break-word; /* ADDED: Allows long words in abstract to break */
+    word-break: break-word; /* ADDED: Alternative/fallback word breaking */
+
+    /* --- Optional: Add multi-line ellipsis for the abstract --- */
+    display: -webkit-box; /* Use flexbox approach for ellipsis */
+    -webkit-line-clamp: 4; /* Limit to 4 lines (adjust as needed) */
+    -webkit-box-orient: vertical;
+    overflow: hidden; /* Hide the overflowing text */
+    text-overflow: ellipsis; /* Add '...' */
+    /* The 'overflow: hidden' from .journal-card already helps, but this targets abstract specifically */
+    /* --- End Optional --- */
+
+    flex-grow: 1; /* ADDED: Allows abstract to take available space before authors */
+}
+
+.journal-abstract strong {
+    color: #2a166f;
+}
+
+.journal-authors {
+    display: flex;
+    align-items: center;
+    font-size: 0.85rem;
+    color: #718096;
+    margin-top: auto; /* ADDED: Pushes authors to the bottom of the card */
+    flex-shrink: 0; /* ADDED: Prevent authors section from shrinking */
+}
+
+.journal-authors img {
+    width: 20px;
+    height: 20px;
+    margin-right: 0.5rem;
+}
+
+.load-more-btn {
+    display: block;
+    width: 100%;
+    padding: 1rem;
+    margin: 1.5rem auto;
+    background: #2a166f;
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.load-more-btn:hover {
+    background: #1a1047;
+}
+
+/* ===== TABLET STYLES (768px and up) ===== */
+@media (min-width: 768px) {
+    .journal-explorer {
+        flex-direction: row;
+        align-items: flex-start;
+        gap: 1.5rem;
+        margin: 1.5rem;
+    }
+
+    .journal-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+    }
+
+    .mobile-menu-toggle {
+        display: none;
+    }
+
+    .journal-sidebar {
+        display: block;
+        width: 250px;
+        position: sticky;
+        top: 1rem;
+        flex-shrink: 0;
+    }
+
+    .journal-content {
+        flex-grow: 1;
+    }
+
+    .filter-controls {
+        flex-direction: row;
+        align-items: center;
+    }
+
+    .filter-title {
+        display: inline;
+        margin-right: 1rem;
+        margin-bottom: 0;
+    }
+
+    .filter-input {
+        width: 120px;
+    }
+
+    .apply-filter {
+        width: auto;
+        padding: 0.75rem 1.5rem;
+    }
+
+    .journal-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 767px) {
+    .journal-grid {
+        grid-template-columns: 1fr; /* Single column */
+        gap: 1rem;
+    }
+
+    .journal-card {
+        width: 100%;
+    }
+}
+
+/* ===== DESKTOP STYLES (1024px and up) ===== */
+@media (min-width: 1024px) {
+    .journal-explorer {
+        max-width: 1200px;
+        margin: 2rem auto;
+    }
+
+    .journal-sidebar {
+        width: 280px;
+        padding: 2rem;
+    }
+
+    .journal-sidebar h2 {
+        font-size: 1.5rem;
+    }
+
+    .filter-controls {
+        justify-content: flex-end;
+    }
+
+    .journal-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+    }
+
+    .journal-card {
+        padding: 1.75rem;
+    }
+}
+
+/* ===== LARGE DESKTOP STYLES (1440px and up) ===== */
+@media (min-width: 1440px) {
+    .journal-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
 /* journal container */
 .journal-container {
     margin: 50px;
