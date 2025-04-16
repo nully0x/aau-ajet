@@ -95,7 +95,7 @@ async fn main() -> std::io::Result<()> {
             // --- End Logging ---
             // Serve static files
             .service(fs::Files::new("/static", "./src/static"))
-            .service(fs::Files::new("/data/uploads", "./data/uploads"))
+            .service(fs::Files::new("/download", "./data/uploads"))
             // --- Public Routes ---
             .service(routes::landing::landing_handler)
             .service(routes::journals::journal_detail_handler)
