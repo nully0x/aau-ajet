@@ -1,14 +1,15 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Journal {
     pub id: Option<i32>,
     pub title: String,
     pub authors: String,
     pub abstract_text: String,
     pub keywords: String,
-    pub volume: String,
+    pub volume_number: i32,
+    pub issue_number: i32,
     pub pages: String,
     pub publication_date: DateTime<Utc>,
     pub pdf_url: String,
@@ -21,7 +22,8 @@ impl Journal {
         authors: String,
         abstract_text: String,
         keywords: String,
-        volume: String,
+        volume_number: i32,
+        issue_number: i32,
         pages: String,
         publication_date: DateTime<Utc>,
         pdf_url: String,
@@ -32,7 +34,8 @@ impl Journal {
             authors,
             abstract_text,
             keywords,
-            volume,
+            volume_number,
+            issue_number,
             pages,
             publication_date,
             pdf_url,
@@ -45,5 +48,10 @@ impl Journal {
 
     pub fn pdf_url(&self) -> String {
         format!("data/uploads/{}", self.pdf_url)
+    }
+
+    // Helper to display volume/issue nicely
+    pub fn volume_issue_display(&self) -> String {
+        format!("Vol. {} No. {}", self.volume_number, self.issue_number)
     }
 }

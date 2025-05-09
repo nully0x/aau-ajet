@@ -89,21 +89,55 @@ endblock %} {% block content %}
         <div style="display: flex; gap: 1rem; margin-bottom: 15px">
             <div class="form-group" style="flex: 1">
                 <label
-                    for="volume"
+                    for="volume_number"
                     style="
                         display: block;
                         margin-bottom: 5px;
                         font-weight: 500;
                         color: #333;
                     "
-                    >Volume</label
                 >
+                    Volume Number
+                </label>
                 <input
-                    type="text"
-                    id="volume"
-                    name="volume"
+                    type="number"
+                    id="volume_number"
+                    name="volume_number"
                     required
                     class="form-control"
+                    min="1"
+                    style="
+                        width: 100%;
+                        padding: 8px 12px;
+                        border: 1px solid #ced4da;
+                        border-radius: 4px;
+                        font-size: 16px;
+                        transition: border-color 0.15s ease-in-out;
+                        box-sizing: border-box;
+                    "
+                    onFocus="this.style.borderColor='#4a5568'; this.style.boxShadow='0 0 0 0.2rem rgba(0,123,255,.25)';"
+                    onBlur="this.style.borderColor='#ced4da'; this.style.boxShadow='none';"
+                />
+            </div>
+            <div class="form-group" style="flex: 1">
+                <label
+                    for="issue_number"
+                    style="
+                        display: block;
+                        margin-bottom: 5px;
+                        font-weight: 500;
+                        color: #333;
+                    "
+                >
+                    Issue Number
+                </label>
+                <input
+                    type="number"
+                    id="issue_number"
+                    name="issue_number"
+                    required
+                    class="form-control"
+                    min="1"
                     style="
                         width: 100%;
                         padding: 8px 12px;
@@ -320,18 +354,27 @@ endblock %} {% block content %}
                 'button[type="submit"]',
             );
 
-            submitButton.disabled = true; // Disable button during upload
+            // Add form validation
+            const volumeNumber = parseInt(formData.get("volume_number"));
+            const issueNumber = parseInt(formData.get("issue_number"));
+
+            if (volumeNumber < 1 || issueNumber < 1) {
+                statusDiv.style.display = "block";
+                errorMsg.textContent =
+                    "Volume and Issue numbers must be positive integers.";
+                return;
+            }
+
+            submitButton.disabled = true;
             submitButton.textContent = "Uploading...";
-            statusDiv.style.display = "none"; // Hide previous status
+            statusDiv.style.display = "none";
             successMsg.textContent = "";
             errorMsg.textContent = "";
 
             try {
                 const response = await fetch("/admin/upload", {
-                    // Ensure URL matches POST route
                     method: "POST",
                     body: formData,
-                    // Add headers if needed (e.g., CSRF token)
                 });
 
                 const result = await response.json();
@@ -341,10 +384,10 @@ endblock %} {% block content %}
                     successMsg.textContent =
                         result.message || "Upload successful!";
                     errorMsg.textContent = "";
-                    e.target.reset(); // Clear form on success
+                    e.target.reset();
                     setTimeout(() => {
                         statusDiv.style.display = "none";
-                    }, 5000); // Hide status after 5s
+                    }, 5000);
                 } else {
                     successMsg.textContent = "";
                     errorMsg.textContent = `Error: ${result.message || response.statusText || "Upload failed"}`;

@@ -1,0 +1,131 @@
+{% extends "admin/layouts/base.html" %} {% block title %}Edit Journal{% endblock
+%} {% block content %}
+<div class="content-wrapper">
+    <div class="page-header">
+        <h2>Edit Journal</h2>
+        <a href="/journals/{{ journal.id_string() }}" class="btn-back">
+            <ion-icon name="arrow-back-outline"></ion-icon>
+            Back
+        </a>
+    </div>
+
+    {% if let Some(err_msg) = error %}
+    <div class="alert-error">{{ err_msg }}</div>
+    {% endif %}
+
+    <form
+        method="post"
+        action="/admin/{{ journal.id_string() }}/edit"
+        class="edit-form"
+    >
+        <div class="form-row">
+            <label for="title">Title</label>
+            <input
+                type="text"
+                id="title"
+                name="title"
+                value="{{ journal.title }}"
+                required
+            />
+        </div>
+
+        <div class="form-row">
+            <label for="authors">Authors</label>
+            <input
+                type="text"
+                id="authors"
+                name="authors"
+                value="{{ journal.authors }}"
+                required
+            />
+        </div>
+
+        <div class="form-row">
+            <label for="abstract_text">Abstract</label>
+            <textarea id="abstract_text" name="abstract_text" required>
+{{ journal.abstract_text }}</textarea
+            >
+        </div>
+
+        <div class="form-row">
+            <label for="keywords">Keywords</label>
+            <input
+                type="text"
+                id="keywords"
+                name="keywords"
+                value="{{ journal.keywords }}"
+                required
+            />
+        </div>
+
+        <div class="form-group">
+            <div class="form-row">
+                <label for="volume_number">Volume</label>
+                <input
+                    type="number"
+                    id="volume_number"
+                    name="volume_number"
+                    value="{{ journal.volume_number }}"
+                    required
+                    min="1"
+                />
+            </div>
+
+            <div class="form-row">
+                <label for="issue_number">Issue</label>
+                <input
+                    type="number"
+                    id="issue_number"
+                    name="issue_number"
+                    value="{{ journal.issue_number }}"
+                    required
+                    min="1"
+                />
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="form-row">
+                <label for="pages">Pages</label>
+                <input
+                    type="text"
+                    id="pages"
+                    name="pages"
+                    value="{{ journal.pages }}"
+                    required
+                    pattern="^\d+(-\d+)?$"
+                />
+            </div>
+
+            <div class="form-row">
+                <label for="publication_date">Publication Date</label>
+                <input
+                    type="date"
+                    id="publication_date"
+                    name="publication_date"
+                    value="{{ journal.publication_date}}"
+                    required
+                />
+            </div>
+        </div>
+
+        <div class="form-row">
+            <label for="pdf_url">PDF URL</label>
+            <input
+                type="text"
+                id="pdf_url"
+                name="pdf_url"
+                value="{{ journal.pdf_url }}"
+                required
+            />
+        </div>
+
+        <div class="form-actions">
+            <a href="/journals/{{ journal.id_string() }}" class="btn-secondary"
+                >Cancel</a
+            >
+            <button type="submit" class="btn-primary">Update Journal</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

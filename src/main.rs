@@ -104,6 +104,7 @@ async fn main() -> std::io::Result<()> {
             .service(routes::submissions::process_submission)
             .service(routes::editorial::editorial_board_handler)
             .service(routes::journals::journal_handler)
+            .service(routes::journals::journal_initial_data)
             .service(routes::journals::journal_api_handler)
             .service(routes::manuscript::manuscript_guide)
             .service(routes::auth::show_login_form)
@@ -117,7 +118,9 @@ async fn main() -> std::io::Result<()> {
                     .service(routes::admin::process_upload)
                     .service(routes::admin::delete_journal_handler)
                     .service(routes::admin::admin_submissions_handler)
-                    .service(routes::admin::download_submission_handler),
+                    .service(routes::admin::download_submission_handler)
+                    .service(routes::admin::edit_journal_form_handler)
+                    .service(routes::admin::update_journal_handler),
             )
     })
     .bind((host.as_str(), port))?

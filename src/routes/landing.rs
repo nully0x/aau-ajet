@@ -18,7 +18,9 @@ pub async fn landing_handler() -> Result<HttpResponse, SubmissionError> {
     let repository = JournalRepository::new(conn);
     let journals = repository.get_latest_journals(3)?; // Get latest 3 journals
 
-    let template = LandingTemplate { journals };
-
-    Ok(HttpResponse::Ok().body(template.render().unwrap()))
+    Ok(HttpResponse::Ok().body(
+        LandingTemplate { journals }
+            .render()
+            .map_err(|e| SubmissionError::InternalError(format!("Template error: {}", e)))?,
+    ))
 }
