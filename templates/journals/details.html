@@ -2,7 +2,7 @@
 <div class="journal-container">
     <div class="breadcrumb">Journals / <a href="#">Full Article</a></div>
     <div class="volume">
-        Volume: {{journal.volume}} | Page: {{journal.pages}}
+        Volume: {{journal.volume_issue_display()}} | Page: {{journal.pages}}
     </div>
     <div class="authors" style="display: flex; align-items: center">
         <img src="/static/assets/group.png" alt="" style="margin-right: 5px" />
@@ -17,7 +17,7 @@
     <div class="citation">
         Citation: {{journal.authors}} ({{journal.publication_date.year()}}).
         {{journal.title}}. African Journal of Educational Technology,
-        {{journal.volume}}, {{journal.pages}}.
+        {{journal.volume_issue_display()}}, {{journal.pages}}.
     </div>
     <a
         href="/download/{{journal.pdf_url}}"
@@ -29,20 +29,36 @@
 
     <!-- Optional: Add a delete button here (requires JS) -->
     {% if is_admin %}
-    <button
-        onclick="deleteJournal('{{ id_string }}')"
-        style="
-            background-color: red;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-left: 10px;
-        "
-    >
-        Delete Article
-    </button>
+    <div class="admin-actions" style="display: inline-block; margin-left: 10px">
+        <a
+            href="/admin/{{ id_string }}/edit"
+            style="
+                background-color: #2a166f;
+                color: white;
+                padding: 10px 20px;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+                text-decoration: none;
+                margin-right: 10px;
+            "
+            >Edit Article</a
+        >
+
+        <button
+            onclick="deleteJournal('{{ id_string }}')"
+            style="
+                background-color: red;
+                color: white;
+                padding: 10px 20px;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+            "
+        >
+            Delete Article
+        </button>
+    </div>
     {% endif %}
     <script>
         async function deleteJournal(journalId) {

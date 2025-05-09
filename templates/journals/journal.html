@@ -13,42 +13,58 @@
             <li data-category="current">Current Edition</li>
             <li data-category="past">Past Issue</li>
         </ul>
+
+        <h3>Archives</h3>
+        <div class="archives-list">
+            {% for (volume, issues) in archives %}
+            <div class="volume-group">
+                <h4>Volume {{ volume }}</h4>
+                <ul>
+                    {% for (issue, journals) in issues %}
+                    <li data-volume="{{ volume }}" data-issue="{{ issue }}">
+                        Issue {{ issue }} ({{ self.get_journal_count(journals)
+                        }} articles)
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endfor %}
+        </div>
     </aside>
 
     <main class="journal-content">
         <div class="journal-filters">
             <span id="filterTitle" class="filter-title"
-                >Showing for all articles/journals</span
+                >Showing all articles</span
             >
             <div class="filter-controls">
                 <div class="filter-input">
-                    <i class="fas fa-filter" aria-hidden="true"></i>
-                    <input
-                        type="text"
-                        placeholder="Vol No."
-                        aria-label="Volume number filter"
-                    />
+                    <select id="volumeSelect" aria-label="Volume number filter">
+                        <option value="">All Volumes</option>
+                        {% for (volume, _) in archives %}
+                        <option value="{{ volume }}">
+                            Volume {{ volume }}
+                        </option>
+                        {% endfor %}
+                    </select>
                 </div>
                 <div class="filter-input">
-                    <i class="fas fa-filter" aria-hidden="true"></i>
-                    <input
-                        type="text"
-                        placeholder="Issue No."
-                        aria-label="Issue number filter"
-                    />
+                    <select id="issueSelect" aria-label="Issue number filter">
+                        <option value="">All Issues</option>
+                    </select>
                 </div>
-                <button class="apply-filter">Apply Filter</button>
+                <button id="resetFilters" class="reset-btn">
+                    Reset Filters
+                </button>
             </div>
         </div>
 
         <div class="journal-grid" id="journalContainer">
             {% for journal in journals %}
-            <article
-                class="journal-card"
-                onclick="window.location.href='/journals/{{journal.id_string()}}'"
-            >
+            <article class="journal-card">
                 <p class="journal-meta">
-                    Volume: {{journal.volume}} | Page: {{journal.pages}}
+                    Volume: {{journal.volume_issue_display()}} | Page:
+                    {{journal.pages}}
                 </p>
                 <h3 class="journal-title">{{journal.title}}</h3>
                 <div class="journal-abstract">
@@ -59,52 +75,337 @@
                     <img src="/static/assets/group.png" alt="Authors icon" />
                     <span>{{journal.authors}}</span>
                 </div>
+                <a href="/journals/{{journal.id_string()}}" class="read-more"
+                    >Read More →</a
+                >
             </article>
             {% endfor %}
         </div>
-        <script>
-            document
-                .querySelector(".mobile-menu-toggle")
-                .addEventListener("click", function () {
-                    document
-                        .querySelector(".journal-sidebar")
-                        .classList.toggle("active");
-                });
 
-            document.querySelectorAll(".category-list li").forEach((item) => {
-                item.addEventListener("click", async function () {
-                    document
-                        .querySelectorAll(".category-list li")
-                        .forEach((li) => {
-                            li.classList.remove("active");
-                        });
-
-                    this.classList.add("active");
-
-                    document.getElementById("filterTitle").textContent =
-                        `Showing for ${this.textContent.toLowerCase()} articles`;
-
-                    await fetchJournals(this.dataset.category);
-                });
-            });
-
-            document
-                .getElementById("loadMoreBtn")
-                ?.addEventListener("click", async function () {
-                    await fetchMoreJournals();
-                });
-
-            async function fetchJournals(category) {
-                console.log(`Fetching journals for category: ${category}`);
-            }
-
-            async function fetchMoreJournals() {
-                console.log("Fetching more journals");
-            }
-        </script>
+        <div
+            id="loadingIndicator"
+            class="loading-indicator"
+            style="display: none"
+        >
+            Loading...
+        </div>
 
         <button id="loadMoreBtn" class="load-more-btn">Load More</button>
     </main>
 </div>
 
+<script>
+    // Initialize variables
+    let journals = [];
+    let currentPage = 1;
+    let currentCategory = "all";
+    let currentVolume = "";
+    let currentIssue = "";
+    const ITEMS_PER_PAGE = 12;
+
+    // DOM Elements
+    const journalContainer = document.getElementById("journalContainer");
+    const loadMoreBtn = document.getElementById("loadMoreBtn");
+    const loadingIndicator = document.getElementById("loadingIndicator");
+    const volumeSelect = document.getElementById("volumeSelect");
+    const issueSelect = document.getElementById("issueSelect");
+    const filterTitle = document.getElementById("filterTitle");
+    const resetFiltersBtn = document.getElementById("resetFilters");
+
+    // Initialize data
+    async function initializeData() {
+        try {
+            showLoading(true);
+            const response = await fetch("/api/journals/initial-data");
+            if (!response.ok) throw new Error("Failed to fetch initial data");
+            journals = await response.json();
+            updateIssueSelect();
+            showLoading(false);
+        } catch (error) {
+            console.error("Error initializing data:", error);
+            showLoading(false);
+        }
+    }
+
+    function showLoading(show) {
+        loadingIndicator.style.display = show ? "block" : "none";
+        loadMoreBtn.style.display = show ? "none" : "block";
+    }
+
+    // Mobile menu toggle
+    document
+        .querySelector(".mobile-menu-toggle")
+        .addEventListener("click", () => {
+            document
+                .querySelector(".journal-sidebar")
+                .classList.toggle("active");
+        });
+
+    // Update issue select options based on selected volume
+    volumeSelect.addEventListener("change", (e) => {
+        currentVolume = e.target.value;
+        updateIssueSelect();
+        filterJournals();
+    });
+
+    issueSelect.addEventListener("change", (e) => {
+        currentIssue = e.target.value;
+        filterJournals();
+    });
+
+    // Reset filters
+    resetFiltersBtn.addEventListener("click", () => {
+        currentVolume = "";
+        currentIssue = "";
+        currentCategory = "all";
+        volumeSelect.value = "";
+        issueSelect.value = "";
+        document.querySelectorAll(".category-list li").forEach((li) => {
+            li.classList.remove("active");
+        });
+        document.querySelector('[data-category="all"]').classList.add("active");
+        filterJournals();
+    });
+
+    // Category filtering
+    document.querySelectorAll(".category-list li").forEach((item) => {
+        item.addEventListener("click", async () => {
+            document.querySelectorAll(".category-list li").forEach((li) => {
+                li.classList.remove("active");
+            });
+            item.classList.add("active");
+            currentCategory = item.dataset.category;
+            currentPage = 1;
+            await fetchJournals();
+        });
+    });
+
+    // Volume/Issue filtering from sidebar
+    document.querySelectorAll(".archives-list li").forEach((item) => {
+        item.addEventListener("click", () => {
+            currentVolume = item.dataset.volume;
+            currentIssue = item.dataset.issue;
+            volumeSelect.value = currentVolume;
+            updateIssueSelect();
+            issueSelect.value = currentIssue;
+            filterJournals();
+        });
+    });
+
+    // Load more
+    loadMoreBtn.addEventListener("click", async () => {
+        currentPage++;
+        await fetchJournals(true);
+    });
+
+    async function fetchJournals(append = false) {
+        showLoading(true);
+
+        try {
+            const params = new URLSearchParams({
+                page: currentPage,
+                limit: ITEMS_PER_PAGE,
+                category: currentCategory,
+            });
+
+            if (currentVolume) params.append("volume", currentVolume);
+            if (currentIssue) params.append("issue", currentIssue);
+
+            const response = await fetch(`/api/journals?${params}`);
+            if (!response.ok) throw new Error("Failed to fetch journals");
+            const data = await response.json();
+
+            if (!append) {
+                journalContainer.innerHTML = "";
+            }
+
+            data.journals.forEach((journal) => {
+                journalContainer.appendChild(createJournalCard(journal));
+            });
+
+            loadMoreBtn.style.display = data.hasMore ? "block" : "none";
+            updateFilterTitle();
+        } catch (error) {
+            console.error("Error fetching journals:", error);
+        } finally {
+            showLoading(false);
+        }
+    }
+
+    function updateIssueSelect() {
+        issueSelect.innerHTML = '<option value="">All Issues</option>';
+        if (currentVolume) {
+            const issues = Object.keys(
+                journals
+                    .filter((j) => j.volume_number.toString() === currentVolume)
+                    .reduce((acc, j) => {
+                        acc[j.issue_number] = true;
+                        return acc;
+                    }, {}),
+            );
+
+            issues
+                .sort((a, b) => Number(a) - Number(b))
+                .forEach((issue) => {
+                    const option = document.createElement("option");
+                    option.value = issue;
+                    option.textContent = `Issue ${issue}`;
+                    issueSelect.appendChild(option);
+                });
+        }
+    }
+
+    function createJournalCard(journal) {
+        const article = document.createElement("article");
+        article.className = "journal-card";
+
+        const content = document.createElement("div");
+
+        const meta = document.createElement("p");
+        meta.className = "journal-meta";
+        meta.textContent = `Volume: ${journal.volume_number} Issue: ${journal.issue_number} | Page: ${journal.pages}`;
+
+        const title = document.createElement("h3");
+        title.className = "journal-title";
+        title.textContent = journal.title;
+
+        const abstract = document.createElement("div");
+        abstract.className = "journal-abstract";
+        abstract.innerHTML = `<strong>Abstract:</strong><p>${escapeHtml(journal.abstract_text)}</p>`;
+
+        const authors = document.createElement("div");
+        authors.className = "journal-authors";
+        authors.innerHTML = `
+            <img src="/static/assets/group.png" alt="Authors icon" />
+            <span>${escapeHtml(journal.authors)}</span>
+        `;
+
+        const readMore = document.createElement("a");
+        readMore.href = `/journals/${journal.id}`;
+        readMore.className = "read-more";
+        readMore.textContent = "Read More →";
+
+        article.append(meta, title, abstract, authors, readMore);
+        return article;
+    }
+
+    function escapeHtml(unsafe) {
+        return unsafe
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
+    function updateFilterTitle() {
+        let title = "Showing ";
+        if (currentCategory !== "all") {
+            title += `${currentCategory} `;
+        }
+        if (currentVolume) {
+            title += `Volume ${currentVolume} `;
+            if (currentIssue) {
+                title += `Issue ${currentIssue} `;
+            }
+        }
+        title += "articles";
+        filterTitle.textContent = title;
+    }
+
+    // Initialize the application
+    initializeData();
+</script>
+
+<style>
+    .journal-explorer {
+        display: flex;
+        gap: 2rem;
+        padding: 20px;
+    }
+
+    .journal-sidebar {
+        width: 250px;
+        padding: 20px;
+        background: #f5f5f5;
+        border-radius: 8px;
+    }
+
+    .journal-content {
+        flex: 1;
+    }
+
+    .archives-list .volume-group {
+        margin-bottom: 15px;
+    }
+
+    .archives-list ul {
+        list-style: none;
+        padding-left: 15px;
+    }
+
+    .archives-list li {
+        cursor: pointer;
+        padding: 5px 0;
+        color: #2a166f;
+    }
+
+    .archives-list li:hover {
+        text-decoration: underline;
+    }
+
+    .filter-controls {
+        display: flex;
+        gap: 10px;
+        margin: 15px 0;
+    }
+
+    .filter-input select {
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        width: 150px;
+    }
+
+    .reset-btn {
+        padding: 8px 15px;
+        background: #f0f0f0;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    .journal-card {
+        border: 1px solid #ddd;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+
+    .read-more {
+        display: inline-block;
+        margin-top: 10px;
+        color: #2a166f;
+        text-decoration: none;
+    }
+
+    .loading-indicator {
+        text-align: center;
+        padding: 20px;
+    }
+
+    @media (max-width: 768px) {
+        .journal-explorer {
+            flex-direction: column;
+        }
+
+        .journal-sidebar {
+            width: 100%;
+        }
+
+        .mobile-menu-toggle {
+            display: block;
+        }
+    }
+</style>
 {% endblock %}

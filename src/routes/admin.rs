@@ -7,6 +7,7 @@ use askama::Template;
 use chrono::{DateTime, NaiveDate, Utc};
 use futures::StreamExt;
 use log::{debug, error, warn};
+use serde::Deserialize;
 use serde_json::json;
 use std::path::PathBuf; // Use PathBuf
 
@@ -62,6 +63,37 @@ struct AdminLoginTemplate {
     error: Option<String>,
 }
 
+#[derive(Template)]
+#[template(path = "admin/edit_journal.html")]
+pub struct EditJournalTemplate {
+    pub journal: Journal,
+    pub error: Option<String>,
+    pub current_page: String,
+}
+
+impl EditJournalTemplate {
+    pub fn new(journal: Journal) -> Self {
+        Self {
+            journal,
+            error: None,
+            current_page: "journals".to_string(),
+        }
+    }
+}
+
+#[derive(Deserialize)]
+pub struct EditJournalForm {
+    pub title: String,
+    pub authors: String,
+    pub abstract_text: String,
+    pub keywords: String,
+    pub volume_number: i32,
+    pub issue_number: i32,
+    pub pages: String,
+    pub publication_date: String,
+    pub pdf_url: String,
+}
+
 // --- Handlers ---
 
 #[get("/login")]
@@ -73,7 +105,7 @@ pub async fn admin_login_form_handler() -> HttpResponse {
             AdminLoginTemplate { error: None }
                 .render()
                 .unwrap_or_else(|e| {
-                    error!("Login template render error: {}", e);
+                    error!("Login template render error: {:?}", e); // Changed {} to {:?}
                     "Error rendering login page.".to_string()
                 }),
         )
@@ -96,7 +128,7 @@ pub async fn admin_dashboard_handler(session: Session) -> Result<HttpResponse, A
             Ok(HttpResponse::Ok()
                 .content_type("text/html; charset=utf-8")
                 .body(template.render().map_err(|e| {
-                    error!("Dashboard template render error: {}", e);
+                    error!("Dashboard template render error: {:?}", e); // Changed {} to {:?}
                     actix_web::error::ErrorInternalServerError("Template error")
                 })?))
         }
@@ -116,7 +148,7 @@ pub async fn upload_journal_handler(session: Session) -> Result<HttpResponse, Ac
                 }
                 .render()
                 .map_err(|e| {
-                    error!("Upload template render error: {}", e);
+                    error!("Upload template render error: {:?}", e); // Changed {} to {:?}
                     actix_web::error::ErrorInternalServerError("Template error")
                 })?,
             )),
@@ -129,30 +161,30 @@ pub async fn process_upload(
     session: Session,
     mut payload: Multipart,
 ) -> Result<HttpResponse, ActixError> {
-    // Return ActixError
     match check_authentication(&session) {
         Ok(_) => {
-            // Use block level async, map SubmissionError to ActixError at the end
             let result: Result<HttpResponse, SubmissionError> = async move {
                 let mut title: Option<String> = None;
                 let mut authors: Option<String> = None;
                 let mut abstract_text: Option<String> = None;
                 let mut keywords: Option<String> = None;
-                let mut volume: Option<String> = None;
+                let mut volume_number: Option<i32> = None;
+                let mut issue_number: Option<i32> = None;
                 let mut pages: Option<String> = None;
                 let mut publication_date: Option<String> = None;
                 let mut pdf_filename: Option<String> = None;
 
                 while let Some(field_result) = payload.next().await {
                     let mut field = field_result.map_err(|e| {
-                        SubmissionError::FileProcessingError(format!("Multipart error: {}", e))
+                        SubmissionError::FileProcessingError(format!("Multipart error: {:?}", e))
+                        // Changed {} to {:?}
                     })?;
                     let content_disposition =
                         field.content_disposition().cloned().ok_or_else(|| {
                             SubmissionError::ValidationError(
                                 "Content disposition missing".to_string(),
                             )
-                        })?; // Clone disposition
+                        })?;
 
                     let name = content_disposition.get_name().ok_or_else(|| {
                         SubmissionError::ValidationError("Field name missing".to_string())
@@ -163,16 +195,28 @@ pub async fn process_upload(
                         "authors" => authors = Some(utils::read_field(field).await?),
                         "abstract_text" => abstract_text = Some(utils::read_field(field).await?),
                         "keywords" => keywords = Some(utils::read_field(field).await?),
-                        "volume" => volume = Some(utils::read_field(field).await?),
+                        "volume_number" => {
+                            volume_number =
+                                Some(utils::read_field(field).await?.parse().map_err(|_| {
+                                    SubmissionError::ValidationError(
+                                        "Invalid volume number".to_string(),
+                                    )
+                                })?)
+                        }
+                        "issue_number" => {
+                            issue_number =
+                                Some(utils::read_field(field).await?.parse().map_err(|_| {
+                                    SubmissionError::ValidationError(
+                                        "Invalid issue number".to_string(),
+                                    )
+                                })?)
+                        }
                         "pages" => pages = Some(utils::read_field(field).await?),
                         "publication_date" => {
                             publication_date = Some(utils::read_field(field).await?)
                         }
                         "pdf" => pdf_filename = Some(utils::save_uploaded_file(field).await?),
-                        _ => {
-                            // Drain ignored fields explicitly
-                            while field.next().await.is_some() {}
-                        }
+                        _ => while field.next().await.is_some() {},
                     }
                 }
 
@@ -188,8 +232,11 @@ pub async fn process_upload(
                 let keywords = keywords.ok_or(SubmissionError::ValidationError(
                     "Keywords are required".to_string(),
                 ))?;
-                let volume = volume.ok_or(SubmissionError::ValidationError(
-                    "Volume is required".to_string(),
+                let volume_number = volume_number.ok_or(SubmissionError::ValidationError(
+                    "Volume number is required".to_string(),
+                ))?;
+                let issue_number = issue_number.ok_or(SubmissionError::ValidationError(
+                    "Issue number is required".to_string(),
                 ))?;
                 let pages = pages.ok_or(SubmissionError::ValidationError(
                     "Pages are required".to_string(),
@@ -207,15 +254,18 @@ pub async fn process_upload(
                             "Invalid publication date format".to_string(),
                         )
                     })?;
-                let publication_datetime =
-                    DateTime::<Utc>::from_utc(naive_date.and_hms_opt(0, 0, 0).unwrap(), Utc);
+                let publication_datetime = DateTime::<Utc>::from_naive_utc_and_offset(
+                    naive_date.and_hms_opt(0, 0, 0).unwrap(),
+                    Utc,
+                );
 
                 let journal = Journal::new(
                     title,
                     authors,
                     abstract_text,
                     keywords,
-                    volume,
+                    volume_number,
+                    issue_number,
                     pages,
                     publication_datetime,
                     pdf_url,
@@ -223,7 +273,7 @@ pub async fn process_upload(
 
                 let conn = init_db().map_err(|e| SubmissionError::DatabaseError(e.to_string()))?;
                 let repository = JournalRepository::new(conn);
-                let journal_id = repository.save_journal(&journal)?; // This returns Result<_, SubmissionError>
+                let journal_id = repository.save_journal(&journal)?;
 
                 Ok(HttpResponse::Ok().json(UploadResponse {
                     success: true,
@@ -231,11 +281,11 @@ pub async fn process_upload(
                     message: "Journal uploaded successfully".to_string(),
                 }))
             }
-            .await; // await the result of the inner async block
+            .await;
 
-            result.map_err(ActixError::from) // Map SubmissionError -> ActixError if it's Err
+            result.map_err(ActixError::from)
         }
-        Err(redirect) => Ok(redirect), // Return the redirect HttpResponse if auth failed
+        Err(redirect) => Ok(redirect),
     }
 }
 
@@ -285,8 +335,9 @@ pub async fn admin_submissions_handler(session: Session) -> Result<HttpResponse,
                 Ok(HttpResponse::Ok()
                     .content_type("text/html; charset=utf-8")
                     .body(template.render().map_err(|e| {
-                        error!("Submissions template render error: {}", e);
-                        SubmissionError::FileProcessingError(format!("Template error: {}", e))
+                        error!("Submissions template render error: {:?}", e); // Changed {} to {:?}
+                        SubmissionError::FileProcessingError(format!("Template error: {:?}", e))
+                        // Changed {} to {:?}
                     })?))
             }
             .await;
@@ -328,7 +379,7 @@ pub async fn download_submission_handler(
                 // Attempt to open the file
                 let named_file = NamedFile::open_async(&file_path).await.map_err(|io_err| {
                     error!(
-                        "Failed to open submission file {:?} for ID {}: {}",
+                        "Failed to open submission file {:?} for ID {}: {:?}", // Changed {} to {:?}
                         file_path, submission_id, io_err
                     );
                     // Map IO error to NotFound or InternalError appropriately
@@ -339,7 +390,7 @@ pub async fn download_submission_handler(
                         ))
                     } else {
                         SubmissionError::StorageError(format!(
-                            "Error opening submission file: {}",
+                            "Error opening submission file: {:?}", // Changed {} to {:?}
                             io_err
                         ))
                     }
@@ -357,6 +408,106 @@ pub async fn download_submission_handler(
             match result {
                 Ok(named_file) => Ok(named_file.into_response(&req)), // Convert NamedFile to HttpResponse
                 Err(e) => Err(ActixError::from(e)), // Convert SubmissionError to ActixError
+            }
+        }
+        Err(redirect) => Ok(redirect),
+    }
+}
+
+#[post("/{id}/edit")]
+pub async fn update_journal_handler(
+    session: Session,
+    id: web::Path<i32>,
+    form: web::Form<EditJournalForm>,
+) -> Result<HttpResponse, ActixError> {
+    match check_authentication(&session) {
+        Ok(_) => {
+            let journal_id = id.into_inner();
+
+            // Parse the publication date
+            let naive_date = NaiveDate::parse_from_str(&form.publication_date, "%Y-%m-%d")
+                .map_err(|_| {
+                    SubmissionError::ValidationError("Invalid publication date format".to_string())
+                })?;
+
+            let publication_datetime = DateTime::<Utc>::from_naive_utc_and_offset(
+                naive_date.and_hms_opt(0, 0, 0).unwrap(),
+                Utc,
+            );
+
+            // Validate form data
+            if form.title.is_empty()
+                || form.authors.is_empty()
+                || form.abstract_text.is_empty()
+                || form.keywords.is_empty()
+                || form.pages.is_empty()
+                || form.pdf_url.is_empty()
+            {
+                return Err(SubmissionError::ValidationError(
+                    "All fields are required".to_string(),
+                )
+                .into());
+            }
+
+            // Create updated journal
+            let updated_journal = Journal {
+                id: Some(journal_id),
+                title: form.title.clone(),
+                authors: form.authors.clone(),
+                abstract_text: form.abstract_text.clone(),
+                keywords: form.keywords.clone(),
+                volume_number: form.volume_number,
+                issue_number: form.issue_number,
+                pages: form.pages.clone(),
+                publication_date: publication_datetime,
+                pdf_url: form.pdf_url.clone(),
+                created_at: None, // We don't update created_at
+            };
+
+            let conn = init_db().map_err(|e| SubmissionError::DatabaseError(e.to_string()))?;
+            let repository = JournalRepository::new(conn);
+
+            // Update the journal
+            repository.update_journal(&updated_journal)?;
+
+            // Redirect to the journal detail page
+            Ok(HttpResponse::Found()
+                .append_header(("Location", format!("/journals/{}", journal_id)))
+                .finish())
+        }
+        Err(redirect) => Ok(redirect),
+    }
+}
+
+#[get("/{id}/edit")]
+pub async fn edit_journal_form_handler(
+    session: Session,
+    id: web::Path<i32>,
+) -> Result<HttpResponse, ActixError> {
+    match check_authentication(&session) {
+        Ok(_) => {
+            let journal_id = id.into_inner();
+
+            let conn = init_db().map_err(|e| SubmissionError::DatabaseError(e.to_string()))?;
+            let repository = JournalRepository::new(conn);
+
+            match repository.get_journal_by_id(journal_id) {
+                Ok(journal) => {
+                    let template = EditJournalTemplate::new(journal);
+
+                    Ok(HttpResponse::Ok()
+                        .content_type("text/html; charset=utf-8")
+                        .body(template.render().map_err(|e| {
+                            error!("Edit journal template render error: {:?}", e); // Changed {} to {:?}
+                            actix_web::error::ErrorInternalServerError("Template error")
+                        })?))
+                }
+                Err(e) => {
+                    error!("Failed to fetch journal: {:?}", e); // Changed {} to {:?}
+                    Ok(HttpResponse::Found()
+                        .append_header(("Location", "/admin/dashboard"))
+                        .finish())
+                }
             }
         }
         Err(redirect) => Ok(redirect),

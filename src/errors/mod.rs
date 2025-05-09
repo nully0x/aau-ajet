@@ -1,5 +1,5 @@
 use crate::models::response::ValidationResponse;
-use actix_web::{error::ResponseError, http::StatusCode, HttpResponse};
+use actix_web::{error::ResponseError, HttpResponse};
 use serde::Serialize;
 use std::fmt;
 
@@ -13,6 +13,7 @@ pub enum SubmissionError {
     Unauthorized(String),
     HashingError(String),
     InternalError(String),
+    Conflict(String),
 }
 
 // Implement Display manually instead of using derive
@@ -37,6 +38,7 @@ impl fmt::Display for SubmissionError {
             SubmissionError::InternalError(msg) => {
                 write!(f, "Internal error: {}", msg)
             }
+            SubmissionError::Conflict(msg) => write!(f, "Conflict error: {}", msg),
         }
     }
 }
@@ -112,6 +114,10 @@ impl ResponseError for SubmissionError {
                     message: msg.to_string(),
                 })
             }
+            SubmissionError::Conflict(msg) => HttpResponse::Conflict().json(ErrorResponse {
+                error: "CONFLICT_ERROR".to_string(),
+                message: msg.to_string(),
+            }),
         }
     }
 
@@ -125,6 +131,7 @@ impl ResponseError for SubmissionError {
             SubmissionError::Unauthorized(_) => actix_web::http::StatusCode::UNAUTHORIZED,
             SubmissionError::HashingError(_) => actix_web::http::StatusCode::INTERNAL_SERVER_ERROR,
             SubmissionError::InternalError(_) => actix_web::http::StatusCode::INTERNAL_SERVER_ERROR,
+            SubmissionError::Conflict(_) => actix_web::http::StatusCode::CONFLICT,
         }
     }
 }
