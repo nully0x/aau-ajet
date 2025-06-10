@@ -95,7 +95,6 @@
 </div>
 
 <script>
-    // Initialize variables
     let journals = [];
     let currentPage = 1;
     let currentCategory = "all";
@@ -103,7 +102,6 @@
     let currentIssue = "";
     const ITEMS_PER_PAGE = 12;
 
-    // DOM Elements
     const journalContainer = document.getElementById("journalContainer");
     const loadMoreBtn = document.getElementById("loadMoreBtn");
     const loadingIndicator = document.getElementById("loadingIndicator");
@@ -112,7 +110,6 @@
     const filterTitle = document.getElementById("filterTitle");
     const resetFiltersBtn = document.getElementById("resetFilters");
 
-    // Initialize data
     async function initializeData() {
         try {
             showLoading(true);
@@ -132,7 +129,6 @@
         loadMoreBtn.style.display = show ? "none" : "block";
     }
 
-    // Mobile menu toggle
     document
         .querySelector(".mobile-menu-toggle")
         .addEventListener("click", () => {
@@ -141,7 +137,6 @@
                 .classList.toggle("active");
         });
 
-    // Update issue select options based on selected volume
     volumeSelect.addEventListener("change", (e) => {
         currentVolume = e.target.value;
         updateIssueSelect();
@@ -153,7 +148,6 @@
         filterJournals();
     });
 
-    // Reset filters
     resetFiltersBtn.addEventListener("click", () => {
         currentVolume = "";
         currentIssue = "";
@@ -164,10 +158,10 @@
             li.classList.remove("active");
         });
         document.querySelector('[data-category="all"]').classList.add("active");
-        filterJournals();
+        currentPage = 1;
+        fetchJournals();
     });
 
-    // Category filtering
     document.querySelectorAll(".category-list li").forEach((item) => {
         item.addEventListener("click", async () => {
             document.querySelectorAll(".category-list li").forEach((li) => {
@@ -180,19 +174,24 @@
         });
     });
 
-    // Volume/Issue filtering from sidebar
     document.querySelectorAll(".archives-list li").forEach((item) => {
         item.addEventListener("click", () => {
             currentVolume = item.dataset.volume;
             currentIssue = item.dataset.issue;
+            currentCategory = "volume-issue";
             volumeSelect.value = currentVolume;
             updateIssueSelect();
             issueSelect.value = currentIssue;
-            filterJournals();
+
+            document.querySelectorAll(".category-list li").forEach((li) => {
+                li.classList.remove("active");
+            });
+
+            currentPage = 1;
+            fetchJournals();
         });
     });
 
-    // Load more
     loadMoreBtn.addEventListener("click", async () => {
         currentPage++;
         await fetchJournals(true);
@@ -204,12 +203,22 @@
         try {
             const params = new URLSearchParams({
                 page: currentPage,
-                limit: ITEMS_PER_PAGE,
                 category: currentCategory,
             });
 
-            if (currentVolume) params.append("volume", currentVolume);
-            if (currentIssue) params.append("issue", currentIssue);
+            if (
+                currentVolume &&
+                currentIssue &&
+                currentCategory === "volume-issue"
+            ) {
+                params.append("limit", "1000");
+                params.append("volume", currentVolume);
+                params.append("issue", currentIssue);
+            } else {
+                params.append("limit", ITEMS_PER_PAGE);
+                if (currentVolume) params.append("volume", currentVolume);
+                if (currentIssue) params.append("issue", currentIssue);
+            }
 
             const response = await fetch(`/api/journals?${params}`);
             if (!response.ok) throw new Error("Failed to fetch journals");
@@ -223,13 +232,28 @@
                 journalContainer.appendChild(createJournalCard(journal));
             });
 
-            loadMoreBtn.style.display = data.hasMore ? "block" : "none";
+            if (currentCategory === "volume-issue") {
+                loadMoreBtn.style.display = "none";
+            } else {
+                loadMoreBtn.style.display = data.hasMore ? "block" : "none";
+            }
+
             updateFilterTitle();
         } catch (error) {
             console.error("Error fetching journals:", error);
         } finally {
             showLoading(false);
         }
+    }
+
+    function filterJournals() {
+        currentPage = 1;
+        if (currentVolume || currentIssue) {
+            currentCategory = "volume-issue";
+        } else {
+            currentCategory = "all";
+        }
+        fetchJournals();
     }
 
     function updateIssueSelect() {
@@ -245,7 +269,7 @@
             );
 
             issues
-                .sort((a, b) => Number(a) - Number(b))
+                .sort((a, b) => Number(b) - Number(a))
                 .forEach((issue) => {
                     const option = document.createElement("option");
                     option.value = issue;
@@ -258,8 +282,6 @@
     function createJournalCard(journal) {
         const article = document.createElement("article");
         article.className = "journal-card";
-
-        const content = document.createElement("div");
 
         const meta = document.createElement("p");
         meta.className = "journal-meta";
@@ -300,20 +322,24 @@
 
     function updateFilterTitle() {
         let title = "Showing ";
-        if (currentCategory !== "all") {
-            title += `${currentCategory} `;
-        }
-        if (currentVolume) {
+        if (
+            currentCategory === "volume-issue" &&
+            currentVolume &&
+            currentIssue
+        ) {
+            title += `Volume ${currentVolume} Issue ${currentIssue} `;
+        } else if (currentVolume) {
             title += `Volume ${currentVolume} `;
             if (currentIssue) {
                 title += `Issue ${currentIssue} `;
             }
+        } else if (currentCategory !== "all") {
+            title += `${currentCategory} `;
         }
         title += "articles";
         filterTitle.textContent = title;
     }
 
-    // Initialize the application
     initializeData();
 </script>
 
