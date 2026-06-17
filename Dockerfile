@@ -1,4 +1,4 @@
-FROM rust:1.81.0 AS builder
+FROM rust:1.96.0 AS builder
 
 # Create a new empty shell project
 WORKDIR /usr/src/aau-ajet
