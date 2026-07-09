@@ -3,8 +3,8 @@ use crate::{
     utils::{ensure_upload_dir, security::hash_password},      // Import hash_password
 };
 use actix_files as fs;
-use actix_session::{storage::CookieSessionStore, SessionMiddleware}; // Import session components
-use actix_web::{cookie::Key, web, App, HttpServer}; // Import Key and web
+use actix_session::{SessionMiddleware, storage::CookieSessionStore}; // Import session components
+use actix_web::{App, HttpServer, cookie::Key, web}; // Import Key and web
 use dotenv::dotenv;
 use env_logger::Env;
 use log::{error, info, warn};
@@ -77,15 +77,13 @@ async fn main() -> std::io::Result<()> {
     let rate_limit_max = std::env::var("RATE_LIMIT_MAX_REQUESTS")
         .ok()
         .and_then(|v| v.parse::<usize>().ok())
-        .unwrap_or(120);
+        .unwrap_or(10);
     let rate_limit_window = std::env::var("RATE_LIMIT_WINDOW_SECS")
         .ok()
         .and_then(|v| v.parse::<u64>().ok())
-        .unwrap_or(60);
-    let rate_limit_store =
-        std::sync::Arc::new(actix_web_ratelimit::store::MemoryStore::new());
-    let rate_limit_config =
-        middleware::rate_limit_config(rate_limit_max, rate_limit_window);
+        .unwrap_or(10);
+    let rate_limit_store = std::sync::Arc::new(actix_web_ratelimit::store::MemoryStore::new());
+    let rate_limit_config = middleware::rate_limit_config(rate_limit_max, rate_limit_window);
     info!(
         "Rate limiting enabled: {} requests per {}s per client",
         rate_limit_max, rate_limit_window
